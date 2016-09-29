@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <time.h>
-#include"ronghe2.h"
+//#include"ronghe2.h"
 
 
 
@@ -13,16 +13,19 @@
 #include <opencv2/nonfree/nonfree.hpp>
 #include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <cv.h>
-#include <cxcore.h>
-#include <highgui.h>
+#include <opencv/cv.h>
+#include <opencv/cxcore.h>
+#include <opencv/highgui.h>
 using namespace std;
 using namespace cv;
 
 class FindCountour
 {
 public:
-	FindCountour(){}
+	string save_path_; 
+
+	FindCountour(char *save_path): save_path_(save_path)
+	{}
 
 IplImage *  translation(IplImage *src,int dix,int diy)//平移
 {
@@ -36,8 +39,8 @@ IplImage *  translation(IplImage *src,int dix,int diy)//平移
 		   cvSet2D(pSrcImage,(i+diy)%src->height,(j+dix)%src->width,color);
 	   }
    }
-   cvNamedWindow("dst");
-   cvShowImage("dst",pSrcImage);
+   //cvNamedWindow("dst");
+   //cvShowImage("dst",pSrcImage);
    //cvWaitKey(0);
    return pSrcImage;
    //cvReleaseImage(&pSrcImage);
@@ -53,18 +56,18 @@ IplImage* transform(IplImage *src,double scale)//缩放
 	IplImage* dst=cvCreateImage(cvGetSize(src),IPL_DEPTH_8U, src->nChannels);
 	cvCopy(src,dst,0);
 	cvSetImageROI(dst,cvRect(121,45,137,208));
-	cvNamedWindow("dst", CV_WINDOW_AUTOSIZE);
-	cvShowImage("dst", dst); //dst 是剪裁后的图片
-	cvWaitKey(0);	
+	//cvNamedWindow("dst", CV_WINDOW_AUTOSIZE);
+	//cvShowImage("dst", dst); //dst 是剪裁后的图片
+	//cvWaitKey(0);	
 	//double scale=0.5;
 	 CvSize czSize;
 	 czSize.width = src->width * scale;
 	 czSize.height = src->height * scale; 
 	IplImage *pSrcImage = cvCreateImage(czSize, src->depth, src->nChannels);//缩放后的照片
 	cvResize(dst, pSrcImage, CV_INTER_AREA); //缩放图片
-	cvNamedWindow("pSrcImage", CV_WINDOW_AUTOSIZE);
-	cvShowImage("pSrcImage", pSrcImage); 
-	cvWaitKey(0);	
+	//cvNamedWindow("pSrcImage", CV_WINDOW_AUTOSIZE);
+	//cvShowImage("pSrcImage", pSrcImage); 
+	//cvWaitKey(0);	
 	cvResetImageROI(dst);
 	return  dst;
 }
@@ -133,9 +136,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
  
 	  IplImage *dst = cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
 	  cvCopy(src,dst,0);
-	   cvNamedWindow("src", CV_WINDOW_AUTOSIZE);
-	   cvShowImage("src", dst); //灰度图
-	  cvWaitKey(0);
+	  // cvNamedWindow("src", CV_WINDOW_AUTOSIZE);
+	  // cvShowImage("src", dst); //灰度图
+//cvWaitKey(0);
 	  IplImage *gray =  cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, 1);
 	  cvCvtColor(dst, gray, CV_BGR2GRAY);
 	  IplImage *binary = cvCreateImage(cvGetSize(gray), IPL_DEPTH_8U, 1); 
@@ -203,9 +206,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 	}//for first_constours;
 
 
-	cvNamedWindow("pOutlineImage1", CV_WINDOW_AUTOSIZE);
-	cvShowImage("pOutlineImage1", pOutlineImage); //轮廓图
-	cvWaitKey(0);
+	//cvNamedWindow("pOutlineImage1", CV_WINDOW_AUTOSIZE);
+	//cvShowImage("pOutlineImage1", pOutlineImage); //轮廓图
+	//cvWaitKey(0);
 
 
 
@@ -244,9 +247,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 		}
 		cvPolyLine(dst_img, &pt, &npts, 1, 1, CV_RGB(0,255,0), 2);
 
-		cvNamedWindow("dst_img", CV_WINDOW_AUTOSIZE);
-		cvShowImage("dst_img", dst_img); //dst_img最小外接矩形的轮廓
-		cvWaitKey(0);	
+		//cvNamedWindow("dst_img", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("dst_img", dst_img); //dst_img最小外接矩形的轮廓
+		//cvWaitKey(0);	
 		
 		cvSetImageROI(dst,cvRect(rect_pts[1].x,rect_pts[1].y,rect.size.width,rect.size.height));////剪裁
 
@@ -264,9 +267,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 		cvResize(dst, pSrcImage, CV_INTER_AREA); //pSrcImage是缩放后的图片
 		Mat image2=pSrcImage;
 
-		cvNamedWindow("suofang", CV_WINDOW_AUTOSIZE);
-		cvShowImage("suofang", pSrcImage); //pSrcImage 是缩放后的图片
-		cvWaitKey(0);	
+		//cvNamedWindow("suofang", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("suofang", pSrcImage); //pSrcImage 是缩放后的图片
+		//cvWaitKey(0);	
 
 		// CvSize czSize1;
 		 czSize1.width =src->width *2;
@@ -290,7 +293,7 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 		 Rect rect1(rect_pts[1].x,rect_pts[1].y,czSize.width,czSize.height);
 		 image2.copyTo(write1(rect1));
 		
-		 imshow("image2",image2);
+		 //imshow("image2",image2);
 		 
 		 IplImage *write=&IplImage(write1);
 
@@ -409,9 +412,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 		}
 		cvPolyLine(dst_img2, &ptt, &npt3, 1, 1, CV_RGB(0,255,0), 2);
 
-		cvNamedWindow("dst_img2", CV_WINDOW_AUTOSIZE);
-		cvShowImage("dst_img2", dst_img2); //dst_img最小外接矩形的轮廓
-		cvWaitKey(0);	
+		//cvNamedWindow("dst_img2", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("dst_img2", dst_img2); //dst_img最小外接矩形的轮廓
+		//cvWaitKey(0);	
 
 				IplImage* dst4=cvCreateImage(cvGetSize(Image),IPL_DEPTH_8U, Image->nChannels);
 		cvCopy(Image,dst4,0);
@@ -449,9 +452,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 		cvLine( dst4, p2, p0,CV_RGB(0,255,0), 1, 8,0 );
 	  	
 
-		cvNamedWindow("dst4", CV_WINDOW_AUTOSIZE);
-		cvShowImage("dst4", dst4); //dst4是画了方框的图片
-		cvWaitKey(0);
+		//cvNamedWindow("dst4", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("dst4", dst4); //dst4是画了方框的图片
+		//cvWaitKey(0);
 //..........................................................................................//
 
 				Mat write2,image3;
@@ -528,9 +531,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 
 		
 		
-		cvNamedWindow("Image", CV_WINDOW_AUTOSIZE);
-		cvShowImage("Image", image); //Image 是剪裁，旋转，缩放的图片
-		cvWaitKey(0);	
+		//cvNamedWindow("Image", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("Image", image); //Image 是剪裁，旋转，缩放的图片
+		//cvWaitKey(0);	
 
 		return image;
 
@@ -548,9 +551,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 			float anglee=-rect.angle-degree;
 
 			
-		cvNamedWindow("zhuan", CV_WINDOW_AUTOSIZE);
-		cvShowImage("zhuan", zhuan); //binary 是二值化后的图片
-		cvWaitKey(0);
+		//cvNamedWindow("zhuan", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("zhuan", zhuan); //binary 是二值化后的图片
+		//cvWaitKey(0);
 
 		  IplImage* dst2=cvCreateImage(cvGetSize(zhuan),IPL_DEPTH_8U, src->nChannels);
 		  cvCopy(zhuan,dst2,0);
@@ -594,9 +597,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 
 		cvPolyLine(dst_img1, &pt1, &npt, 1, 1, CV_RGB(0,255,0), 2);
 
-		cvNamedWindow("dst_img1", CV_WINDOW_AUTOSIZE);
-		cvShowImage("dst_img1", dst_img1); //dst_img1t 是最小外接矩形的轮廓图
-		cvWaitKey(0);	  	
+		//cvNamedWindow("dst_img1", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("dst_img1", dst_img1); //dst_img1t 是最小外接矩形的轮廓图
+		//cvWaitKey(0);	  	
 
 
 		// CvSize czSize;
@@ -618,9 +621,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 		cvResize(dst2, pSrcImage, CV_INTER_AREA); //缩放后的图片
 		Mat image2=pSrcImage;
 
-		cvNamedWindow("pSrcImage", CV_WINDOW_AUTOSIZE);
-		cvShowImage("pSrcImage", pSrcImage); //dst 是剪裁后的图片
-		cvWaitKey(0);	
+		//cvNamedWindow("pSrcImage", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("pSrcImage", pSrcImage); //dst 是剪裁后的图片
+		//cvWaitKey(0);	
 
 		// CvSize czSize1;
 		 czSize1.width = src->width  *2;
@@ -734,9 +737,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 	}
 
 
-		cvNamedWindow("out2", CV_WINDOW_AUTOSIZE);
-		cvShowImage("out2", out2); 
-		cvWaitKey(0);
+		//cvNamedWindow("out2", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("out2", out2); 
+		//cvWaitKey(0);
 
 
 
@@ -762,9 +765,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 		}
 		cvPolyLine(dst_img2, &ptt, &npt3, 1, 1, CV_RGB(0,255,0), 2);
 
-		cvNamedWindow("dst_img2", CV_WINDOW_AUTOSIZE);
-		cvShowImage("dst_img2", dst_img2); //dst_img最小外接矩形的轮廓
-		cvWaitKey(0);	
+		//cvNamedWindow("dst_img2", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("dst_img2", dst_img2); //dst_img最小外接矩形的轮廓
+		//cvWaitKey(0);	
 
 
 //..........................求出正矩形坐标.......................................//
@@ -803,9 +806,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 		cvLine( dst4, p3, p2,CV_RGB(0,255,0), 1, 8,0 );
 		cvLine( dst4, p2, p0,CV_RGB(0,255,0), 1, 8,0 );
 
-		cvNamedWindow("dst4", CV_WINDOW_AUTOSIZE);
-		cvShowImage("dst4", dst4); //Image 是剪裁，旋转，缩放的图片
-		cvWaitKey(0);
+		//cvNamedWindow("dst4", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("dst4", dst4); //Image 是剪裁，旋转，缩放的图片
+		//cvWaitKey(0);
 
 
 //............................................................................................
@@ -876,9 +879,9 @@ IplImage * originalpicture(IplImage *src,int Threshold,double scale,float degree
 		}
 	
 		
-		cvNamedWindow("Image", CV_WINDOW_AUTOSIZE);
-		cvShowImage("Image", image); //Image 是剪裁，旋转，缩放的图片
-		cvWaitKey(0);	
+		//cvNamedWindow("Image", CV_WINDOW_AUTOSIZE);
+		//cvShowImage("Image", image); //Image 是剪裁，旋转，缩放的图片
+		//cvWaitKey(0);	
 
 		return image;
 
@@ -935,16 +938,16 @@ Mat salt(cv::Mat& image, int n)//椒盐噪声
 }
 
 
-void backgroundpicture( IplImage *src,IplImage *dst1,int Threshold1,int Threshold2 ,double scale,float degree,double per,int dix,int diy,int noise )//Threshold=200
+void backgroundpicture(const char *save_file,IplImage *src,IplImage *dst1,int Threshold1,int Threshold2 ,double scale,float degree,double per,int dix,int diy,int noise )//Threshold=200
 {
 	 
 	  IplImage *srcc=originalpicture(src,Threshold1,scale,degree,dix,diy);
 	  getrectpoints(dix,diy);//输出rect的坐标
 
 
-	   cvNamedWindow("srcc", CV_WINDOW_AUTOSIZE);
-	  cvShowImage("srcc", srcc); //二值图
-	  cvWaitKey(0);
+	   //cvNamedWindow("srcc", CV_WINDOW_AUTOSIZE);
+	  //cvShowImage("srcc", srcc); //二值图
+	  //cvWaitKey(0);
 
 	  Mat src1=srcc;
 	  Mat dst=dst1;
@@ -1120,12 +1123,12 @@ void backgroundpicture( IplImage *src,IplImage *dst1,int Threshold1,int Threshol
    }
 
   
-	cvNamedWindow("pstrWindowsOutLineTitle", CV_WINDOW_AUTOSIZE);
-	cvShowImage("pstrWindowsOutLineTitle", pSrcImage);//平移后的图片 
+	//cvNamedWindow("pstrWindowsOutLineTitle", CV_WINDOW_AUTOSIZE);
+	//cvShowImage("pstrWindowsOutLineTitle", pSrcImage);//平移后的图片 
 	
-	imshow("mask",mask);//掩膜	
-	imshow("new_image",new_image);
-	 cvWaitKey(0); 
+	//imshow("mask",mask);//掩膜	
+	//imshow("new_image",new_image);
+	 //cvWaitKey(0); 
 
 	//double RR=0,GG=0,BB=0;double averageRR;double averageGG;double averageBB;
  //   for(int i=0;i<rr.size();i++)
@@ -1156,9 +1159,12 @@ void backgroundpicture( IplImage *src,IplImage *dst1,int Threshold1,int Threshol
 	//cvNamedWindow("pstrWindowsOutLineTitle", CV_WINDOW_AUTOSIZE);
 	//cvShowImage("pstrWindowsOutLineTitle", dstImg1);//平移后的图片 
 	
-	    imshow("dst",dstt);//最终图片
+	    //imshow("dst",dstt);//最终图片
+        string save_dst;
+		save_dst = save_path_ + string(save_file);
+		cvSaveImage(save_dst.c_str(),dstImg1);
 		cvSaveImage("save.png",dstImg1);//最终图片已经保存在文件夹里
-        cvWaitKey(0); 
+        //cvWaitKey(0); 
 	    cvReleaseMemStorage(&pcvMStorage); 
 	   // cvDestroyWindow("pstrWindowsSrcTitle");
 		 cvReleaseImage(&srcc); 
