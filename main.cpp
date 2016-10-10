@@ -1,3 +1,5 @@
+#ifndef __TEST__
+
 #include <stdio.h>
 #include <math.h>
 #include <fstream>
@@ -14,70 +16,57 @@
 #include <opencv/cv.h>
 #include <opencv/cxcore.h>
 #include <opencv/highgui.h>
-#include"findcountour.h"
+#include "findcountour-new.h"
 
 using namespace cv;
 
 using namespace std;
 
-void extreme_test(FindCountour &f, IplImage * src_pic, IplImage * dst_pic)
+#define ALL_DIR      0
+#define FOUR_DIR     1
+#define TWO_DIR      2
+
+typedef struct Bat_Config_struct
 {
-	vector<int> distance;
+	double max_scale;
+	double min_scale;
+	int rotate_mode;
+	bool with_noise;
+	double min_percent;
+}Bat_Config;
 
-	// scale 2, degree 359, put at 4 corners
-	f.originalpicture(src_pic,150,2,359,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\1.png",src_pic,dst_pic,150,200,2,359,0.5,0,0,0);
+/****************************global variables*************************/
 
-	f.originalpicture(src_pic,150,2,359,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\2.png",src_pic,dst_pic,150,200,2,359,0.5,distance[0],0,0);
+char foreground_file[80] = "E:\\VOCBat_4dir_nonoise\\1.png";
+char background_path[80] = "E:\\VOCdevkit\\VOC2007\\JPEGImages\\";
+char save_path[80] = "E:\\VOCBat_4dir_nonoise\\VOC2007\\JPEGImages\\";
+char save_anno_file[80] = "E:\\VOCBat_4dir_nonoise\\VOC2007\\Annotations\\temp.txt";
+int start_count = 1;
+int total_iter = 10;
 
-	f.originalpicture(src_pic,150,2,359,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\3.png",src_pic,dst_pic,150,200,2,359,0.5,0,distance[1],0);
+Bat_Config config = 
+{
+	2.5,
+	1.0,
+	FOUR_DIR,
+	false,
+	0.3
+};
 
-	f.originalpicture(src_pic,150,2,359,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\4.png",src_pic,dst_pic,150,200,2,359,0.5,distance[0],distance[1],0);
-	
-	// scale 3, degree 45, put at 4 corners
-	f.originalpicture(src_pic,150,3,45,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\5.png",src_pic,dst_pic,150,200,3,45,0.5,0,0,0);
+/*********************************************************************/
 
-	f.originalpicture(src_pic,150,3,45,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\6.png",src_pic,dst_pic,150,200,3,45,0.5,distance[0],0,0);
-
-	f.originalpicture(src_pic,150,3,45,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\7.png",src_pic,dst_pic,150,200,3,45,0.5,0,distance[1],0);
-
-	f.originalpicture(src_pic,150,3,45,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\8.png",src_pic,dst_pic,150,200,3,45,0.5,distance[0],distance[1],0);
-	
-	// scale 0.5, degree 225, put at 4 corners
-	f.originalpicture(src_pic,150,0.5,225,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\9.png",src_pic,dst_pic,150,200,0.5,225,0.5,0,0,0);
-
-	f.originalpicture(src_pic,150,0.5,225,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\10.png",src_pic,dst_pic,150,200,0.5,225,0.5,distance[0],0,0);
-
-	f.originalpicture(src_pic,150,0.5,225,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\11.png",src_pic,dst_pic,150,200,0.5,225,0.5,0,distance[1],0);
-
-	f.originalpicture(src_pic,150,0.5,225,0,0);
-	distance = f.getdistance();
-	f.backgroundpicture("extreme\\12.png",src_pic,dst_pic,150,200,0.5,225,0.5,distance[0],distance[1],0);
+string concat_file_name(char *path, int num)
+{
+	char num_str[10];
+	string con;
+	sprintf(num_str, "%06d", num);
+	con = string(path) + string(num_str) + string(".jpg");
+	return con;
 }
 
-void rand_test(FindCountour &f, IplImage * src_pic, IplImage * dst_pic, int count)
-{
+void make_one_pic(FindCountour &f, IplImage *src_pic, IplImage *dst_pic, int crt_count, Bat_Config &c)
+{	
+	// function internal variables
 	vector<int> distance;
 
 	double scale;
@@ -91,81 +80,101 @@ void rand_test(FindCountour &f, IplImage * src_pic, IplImage * dst_pic, int coun
 	
 	// random seed
 	srand((unsigned int)time(NULL));
-
-	// enter loop
-	for(int i=0;i<count;i++)
+	try
 	{
-		try
+		// get scale ratio
+		scale = ((double)(rand()%100)) * (config.max_scale - config.min_scale) / 100
+				+ config.min_scale;
+		// get rotation degree
+		if(config.rotate_mode == ALL_DIR)
 		{
-			scale = ((double)(rand()%100))*0.015 + 0.5;
+			srand((unsigned int)time(NULL));
 			degree = (float)(rand()%360);
-			f.originalpicture(src_pic,150,scale,degree,0,0);
-			distance = f.getdistance();
-			if(distance[0] < 1 || distance[1] < 1)
-			{
-				cout << "cannot move(max distance too small!)" << endl;
-				throw exception();
-			}
 		}
-		catch(exception &e)
+		else if(config.rotate_mode == FOUR_DIR)
 		{
-			cout << "originalpicture exception:" << endl;
-			cout << "scale: " << scale << endl;
-			cout << "degree: " << degree << endl;
-
-			throw e;
+			srand((unsigned int)time(NULL));
+			degree = (float)(rand()%4) * 90;
 		}
-
-		try
+		else
 		{
-			char c[5];
-			sprintf(c, "%d", i);
-			file_name = string("random\\") + string(c) + string(".png");
-			shift_x = rand()%(distance[0]);
-			shift_y = rand()%(distance[1]);
+			srand((unsigned int)time(NULL));
+			degree = (float)(rand()%2) * 180;
+		}
+		// get move distances
+		f.originalpicture(src_pic, 150, scale, degree, 0, 0);
+		distance = f.getdistance();
+		if(distance[0] < 1 || distance[1] < 1)
+		{
+			cout << "cannot move(max distance too small!)" << endl;
+			throw exception();
+		}
+	}
+	catch(exception &e)
+	{
+		cout << "originalpicture exception:" << endl;
+		cout << "scale: " << scale << endl;
+		cout << "degree: " << degree << endl;
+
+		throw e;
+	}
+
+	try
+	{
+		// generate file name
+		file_name = concat_file_name("", crt_count);
+		// generate shift distance
+		shift_x = rand()%(distance[0]);
+		shift_y = rand()%(distance[1]);
+		// generate noise
+		if(config.with_noise == true)
+		{
 			noise = rand()%2;
-			percent = ((double)(rand()%100))*0.005 + 0.5;
-			f.backgroundpicture(file_name.c_str(),src_pic,dst_pic,150,200,scale,degree,percent,shift_x,shift_y,noise);
 		}
-		catch(exception &e)
+		else
 		{
-			cout << "backgroundpicture exception:" << endl;
-			cout << "scale: " << scale << endl;
-			cout << "degree: " << degree << endl;
-			cout << "percent: " << percent << endl;
-			cout << "max_x: " << distance[0] << endl;
-			cout << "max_y: " << distance[1] << endl;
-			cout << "shift_x: " << shift_x << endl;
-			cout << "shift_y: " << shift_y << endl;
-			cout << "noise: " << noise << endl;
-
-			throw e;
+			noise = 0;
 		}
+		// generate mixture percent
+		percent = ((double)(rand()%100)) * (1 - config.min_percent) / 100 + config.min_percent;
+		// generate mixed picture
+		f.backgroundpicture(file_name.c_str(),src_pic,dst_pic,150,200,scale,degree,percent,shift_x,shift_y,noise);
+	}
+	catch(exception &e)
+	{
+		cout << "backgroundpicture exception:" << endl;
+		cout << "scale: " << scale << endl;
+		cout << "degree: " << degree << endl;
+		cout << "percent: " << percent << endl;
+		cout << "max_x: " << distance[0] << endl;
+		cout << "max_y: " << distance[1] << endl;
+		cout << "shift_x: " << shift_x << endl;
+		cout << "shift_y: " << shift_y << endl;
+		cout << "noise: " << noise << endl;
+
+		throw e;
 	}
 }
 
 int main()
 {
-	Mat img11=imread("1.png",1);//原图
-	IplImage *src=&IplImage(img11);
-	Mat dst1=imread("pic.jpg",1);//背景图
-	IplImage *dst=&IplImage(dst1);
-	FindCountour fc("D:\\VS2008\\Pics\\");
+	FindCountour fc(save_path, save_anno_file, start_count);
 
-	extreme_test(fc, src, dst);
+	// read foreground picture 
+	Mat origin_mat = imread(foreground_file, 1);
+	IplImage *src = &IplImage(origin_mat);
 
-	rand_test(fc, src, dst, 100);
+	for(int i = start_count; i < start_count + total_iter; i++)
+	{
+		// read background picture
+		string file_name = concat_file_name(background_path, i);
+		Mat back_mat = imread(file_name, 1);
+		IplImage *dst = &IplImage(back_mat);
+		// generate a mixed picture and save
+		make_one_pic(fc, src, dst, i, config);
+	}
 
-	//fc.originalpicture(src,150,1.6,60,0,0);//此次执行必须使xy位移写为00
-
-	//vector<int> distance;
-	//distance.clear();
-	//distance=fc.getdistance();
-	//fc.backgroundpicture("save.png",src,dst,150,200,1.6,60,0.5,distance[0],distance[1],0);
-	//fc.originalpicture(src,150,1,30);//originalpicture(IplImage *src,int Threshold,double scale,int degree)
-	//fc.backgroundpicture(src,dst,150,200,1.6,60,0.5,393,271,1);
-	//src--原图，dst--背景图，150--前景图片阈值， 200--背景图片阈值，1.6--缩放比例，
-	//60--旋转角度, 0.5--图片颜色百分比，393--x方向平移距离，271--y方向平移距离	 1---是否注入噪声
-	waitKey(0);
 	return 0;
 }
+
+#endif
