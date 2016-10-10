@@ -11,20 +11,39 @@
 #include <opencv2/nonfree/nonfree.hpp>
 #include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <cv.h>
-#include <cxcore.h>
-#include <highgui.h>
+#include <opencv/cv.h>
+#include <opencv/cxcore.h>
+#include <opencv/highgui.h>
 using namespace std;
 using namespace cv;
 
 class FindCountour
 {
 
-public:
-		string save_path_; 
+private:
+	string save_path_; 
+	string output_file_;
+	int main_count_;
+	ofstream file_handler_;
 
-	FindCountour(char *save_path): save_path_(save_path)
+public:
+	FindCountour(char *save_path):
+	save_path_(save_path), output_file_(""), main_count_(0)
 	{}
+
+	FindCountour(char *save_path, char *output_file, int start_count):
+	save_path_(save_path), output_file_(output_file), main_count_(start_count)
+	{
+		file_handler_.open(output_file, ios::app);
+	}
+
+	~FindCountour()
+	{
+		if(file_handler_)
+		{
+			file_handler_.close();	
+		}
+	}
 
 IplImage *  translation(IplImage *src,int dix,int diy)//平移
 {
@@ -379,7 +398,7 @@ void  originalpicture(IplImage *src,int Threshold,double scale,float degree,int 
 		//cvWaitKey(0);
 
 		double aa=czSize.height*czSize.width;
-		double bb=czSize1.height*czSize1.width*2;
+		double bb=czSize1.height*czSize1.width*3;
 		 r=aa/bb;
 		//cout<<"r==="<<r<<endl;
 		
@@ -894,7 +913,7 @@ void  originalpicture(IplImage *src,int Threshold,double scale,float degree,int 
 	//cout<<"maxarea2"<<maxarea2<<endl;
 
 		double aa=czSize.height*czSize.width;
-		double bb=czSize1.height*czSize1.width*1.4;
+		double bb=czSize1.height*czSize1.width*3;
 		r=aa/bb;
 		//cout<<"r==="<<r<<endl;
 
@@ -905,7 +924,7 @@ void  originalpicture(IplImage *src,int Threshold,double scale,float degree,int 
 	{
 
 	double	area3 = fabs(cvContourArea(f) );
-		if(area3<maxarea2 *0.01||area3==maxarea2)
+		if(area3<maxarea2 *r||area3==maxarea2)
 		{
 			fNext = f->h_next;
 			cvClearSeq(f);
@@ -1177,30 +1196,40 @@ void  originalpicture(IplImage *src,int Threshold,double scale,float degree,int 
 
 void getrectpoints( int dix,int diy)
 {
+	if((output_file_ == string("")) || (!file_handler_))
+	{
 		cout<<endl<<endl;
 		cout<<"平移后坐标"<<endl<<endl;
 		cout<<"dix"<<dix<<endl;
-		cout<<"p0.x==="<<" "<<p00.x+dix<<" "<<"p0.y==="<<p00.x+diy<<endl;
+		cout<<"p0.x==="<<" "<<p00.x+dix<<" "<<"p0.y==="<<p00.y+diy<<endl;
 		cout<<"p1.x==="<<p11.x+dix<<" "<<"p1.y==="<<p11.y+diy<<endl;
 		cout<<"p2.x==="<<p22.x+dix<<" "<<"p2.y==="<<p22.y+diy<<endl;
 		cout<<"p3.x==="<<p33.x+dix<<" "<<"p3.y==="<<p33.y+diy<<endl;
 		cout<<"转动角度==="<<anglee<<endl;
+	}
+	else
+	{
+		file_handler_ << main_count_ << " " << p00.x+dix << " " << p00.y+diy << " "
+			          << p33.x+dix << " " << p33.y+diy << " "
+					  << anglee << endl;
 
+		main_count_++;
+	}
 }
 
 
 
-vector<int >getdistance()
+vector<int> getdistance()
 {
 
 
 		 cout<<"rect.height==="<<cvSize4.height<<"  "<<"rect.width==="<<cvSize4.width<<endl;
 		 cout<<"pic.height==="<<czSize1.height<<"  "<<"pic.width==="<< czSize1.width <<endl;
-		 cout<<"能移动y距离==="<<czSize1.height-cvSize4.width-10<<"   "<<"能移动x距离"<<czSize1.width-cvSize4.height-10<<endl;
+		 cout<<"能移动y距离==="<<czSize1.height-cvSize4.width-11<<"   "<<"能移动x距离"<<czSize1.width-cvSize4.height-11<<endl;
 		 vector<int>distance;
 		 distance.clear();
-		 distance.push_back(czSize1.width-cvSize4.height-10);
-		 distance.push_back(czSize1.height-cvSize4.width-10);
+		 distance.push_back(czSize1.width-cvSize4.height-11);
+		 distance.push_back(czSize1.height-cvSize4.width-11);
 		 return distance;
 }
 
