@@ -1233,7 +1233,61 @@ vector<int> getdistance()
 		 return distance;
 }
 
+#define TWO_PI 6.2831853071795864769252866
+double generateGaussianNoise()
+{
+	static bool hasSpare = false;
+	static double rand1, rand2;
+ 
+	if(hasSpare)
+	{
+		hasSpare = false;
+		return sqrt(rand1) * sin(rand2);
+	}
+ 
+	hasSpare = true;
+ 
+	rand1 = rand() / ((double) RAND_MAX);
+	if(rand1 < 1e-100) rand1 = 1e-100;
+	rand1 = -2 * log(rand1);
+	rand2 = (rand() / ((double) RAND_MAX)) * TWO_PI;
+ 
+	return sqrt(rand1) * cos(rand2);
+}
 
+
+void AddGaussianNoise(Mat& I,int value)
+{
+	// accept only char type matrices
+	CV_Assert(I.depth() != sizeof(uchar));
+
+	int channels = I.channels();
+
+	int nRows = I.rows;
+	int nCols = I.cols * channels;
+
+	if(I.isContinuous()){
+		nCols *= nRows;
+		nRows = 1;
+	}
+
+	int i,j;
+	uchar* p;
+	for(i = 0; i < nRows; ++i){
+		p = I.ptr<uchar>(i);
+		for(j = 0; j < nCols; ++j){
+			double val = p[j] + generateGaussianNoise() * value;//suggest value in 0-50
+			if(val < 0)
+				val = 0;
+			if(val > 255)
+				val = 255;
+
+			p[j] = (uchar)val;
+
+		}
+	}
+
+}
 
 Mat salt(cv::Mat& image, int n)//Ω∑—Œ‘Î…˘
 {
@@ -1253,7 +1307,7 @@ Mat salt(cv::Mat& image, int n)//Ω∑—Œ‘Î…˘
 }
 
 
-void backgroundpicture(const char *save_file,IplImage *src,IplImage *dst1,int Threshold1,int Threshold2 ,double scale,float degree,double per,int dix,int diy,int noise )//Threshold=200
+void backgroundpicture(const char *save_file,IplImage *src,IplImage *dst1,int Threshold1,int Threshold2 ,double scale,float degree,double per,int dix,int diy,int noise,int value )//Threshold=200
 {
 	 
 	 // IplImage *srcc=originalpicture(src,Threshold1,scale,degree,dix,diy);
@@ -1404,18 +1458,18 @@ void backgroundpicture(const char *save_file,IplImage *src,IplImage *dst1,int Th
 			  s3.val[1]=b;
 			  s3.val[2]=c;
 			 CvScalar color=s3;
-			 if(noise==1)
-			 {
-			   if( s3.val[0]<150){color.val[0]=s3.val[0]+(rand()%101/100.0)*50;}
-			   if(s3.val[0]>150){color.val[0]=s3.val[0]-(rand()%101/100.0)*50;}
-			   if( s3.val[1]<150){color.val[1]=s3.val[1]+(rand()%101/100.0)*50;}
-			   if(s3.val[1]>150){color.val[1]=s3.val[1]-(rand()%101/100.0)*50;}
-			   if( s3.val[2]<150){color.val[2]=s3.val[2]+(rand()%101/100.0)*50;}
-			   if(s3.val[2]>150){color.val[2]=s3.val[2]-(rand()%101/100.0)*50;}
-			   //color.val[0]=s2.val[0]*(rand()%101/100.0);
-			   //color.val[1]=s2.val[1]*(rand()%101/100.0);
-			   //color.val[2]=s2.val[2]*(rand()%101/100.0);
-			 }
+			 //if(noise==1)
+			 //{
+			 //  if( s3.val[0]<150){color.val[0]=s3.val[0]+(rand()%101/100.0)*50;}
+			 //  if(s3.val[0]>150){color.val[0]=s3.val[0]-(rand()%101/100.0)*50;}
+			 //  if( s3.val[1]<150){color.val[1]=s3.val[1]+(rand()%101/100.0)*50;}
+			 //  if(s3.val[1]>150){color.val[1]=s3.val[1]-(rand()%101/100.0)*50;}
+			 //  if( s3.val[2]<150){color.val[2]=s3.val[2]+(rand()%101/100.0)*50;}
+			 //  if(s3.val[2]>150){color.val[2]=s3.val[2]-(rand()%101/100.0)*50;}
+			 //  //color.val[0]=s2.val[0]*(rand()%101/100.0);
+			 //  //color.val[1]=s2.val[1]*(rand()%101/100.0);
+			 //  //color.val[2]=s2.val[2]*(rand()%101/100.0);
+			 //}
 			
 			 cvSet2D(pSrcImage,(j+diy)%srcc->height,(i+dix)%srcc->width,color);//“∆∂Øƒø±ÍÕº∆¨		
 			 	
@@ -1455,7 +1509,7 @@ void backgroundpicture(const char *save_file,IplImage *src,IplImage *dst1,int Th
 	
 	Mat dstt=dstImg1;  
 	new_image.copyTo(dstt,mask);//dstt æÕ «◊Ó÷’øŸ»°µƒÕº∆¨
-	
+	if(noise==1){AddGaussianNoise(dstt,value);}
 
 //.......................................................................
 	
@@ -1484,6 +1538,7 @@ void backgroundpicture(const char *save_file,IplImage *src,IplImage *dst1,int Th
 			//cvReleaseImage(&dstImg); 
 
 }
+
 
 public:
 	 CvSize cvSize4;

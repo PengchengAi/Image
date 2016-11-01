@@ -133,7 +133,7 @@ void make_one_pic(FindCountour &f, IplImage *src_pic, IplImage *dst_pic, int crt
 		// generate mixture percent
 		percent = ((double)(rand()%100)) * (1 - config.min_percent) / 100 + config.min_percent;
 		// generate mixed picture
-		f.backgroundpicture(file_name.c_str(),src_pic,dst_pic,150,200,scale,degree,percent,shift_x,shift_y,noise);
+		f.backgroundpicture(file_name.c_str(),src_pic,dst_pic,150,200,scale,degree,percent,shift_x,shift_y,noise,value);//suggest value in 0-50
 	}
 	catch(exception &e)
 	{
