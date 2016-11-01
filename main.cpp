@@ -42,7 +42,7 @@ char background_path[80] = "E:\\VOCdevkit\\VOC2007\\JPEGImages\\";
 char save_path[80] = "E:\\VOCBat_4dir_nonoise\\VOC2007\\JPEGImages\\";
 char save_anno_file[80] = "E:\\VOCBat_4dir_nonoise\\VOC2007\\Annotations\\temp.txt";
 int start_count = 1;
-int total_iter = 10;
+int total_iter = 9963;
 
 Bat_Config config = 
 {
@@ -50,7 +50,7 @@ Bat_Config config =
 	1.0,
 	FOUR_DIR,
 	false,
-	0.3
+	0.75
 };
 
 /*********************************************************************/
@@ -78,8 +78,6 @@ void make_one_pic(FindCountour &f, IplImage *src_pic, IplImage *dst_pic, int crt
 	int shift_y;
 	int noise;
 	
-	// random seed
-	srand((unsigned int)time(NULL));
 	try
 	{
 		// get scale ratio
@@ -88,17 +86,14 @@ void make_one_pic(FindCountour &f, IplImage *src_pic, IplImage *dst_pic, int crt
 		// get rotation degree
 		if(config.rotate_mode == ALL_DIR)
 		{
-			srand((unsigned int)time(NULL));
 			degree = (float)(rand()%360);
 		}
 		else if(config.rotate_mode == FOUR_DIR)
 		{
-			srand((unsigned int)time(NULL));
 			degree = (float)(rand()%4) * 90;
 		}
 		else
 		{
-			srand((unsigned int)time(NULL));
 			degree = (float)(rand()%2) * 180;
 		}
 		// get move distances
@@ -163,6 +158,9 @@ int main()
 	// read foreground picture 
 	Mat origin_mat = imread(foreground_file, 1);
 	IplImage *src = &IplImage(origin_mat);
+
+	// random seed
+	srand((unsigned int)time(NULL));
 
 	for(int i = start_count; i < start_count + total_iter; i++)
 	{

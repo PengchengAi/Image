@@ -1194,7 +1194,7 @@ void  originalpicture(IplImage *src,int Threshold,double scale,float degree,int 
 }
 
 
-void getrectpoints( int dix,int diy)
+void getrectpoints( int dix, int diy, double per, int noise)
 {
 	if((output_file_ == string("")) || (!file_handler_))
 	{
@@ -1211,7 +1211,7 @@ void getrectpoints( int dix,int diy)
 	{
 		file_handler_ << main_count_ << " " << p00.x+dix << " " << p00.y+diy << " "
 			          << p33.x+dix << " " << p33.y+diy << " "
-					  << anglee << endl;
+					  << anglee << " " << per << " " << noise << endl;
 
 		main_count_++;
 	}
@@ -1258,7 +1258,7 @@ void backgroundpicture(const char *save_file,IplImage *src,IplImage *dst1,int Th
 	 
 	 // IplImage *srcc=originalpicture(src,Threshold1,scale,degree,dix,diy);
 	IplImage *srcc=imagee;
-	  getrectpoints(dix,diy);//输出rect的坐标
+	  getrectpoints(dix,diy,per,noise);//输出rect的坐标
 
 
 	  // cvNamedWindow("srcc", CV_WINDOW_AUTOSIZE);
@@ -1371,7 +1371,7 @@ void backgroundpicture(const char *save_file,IplImage *src,IplImage *dst1,int Th
 
 
 
-	 srand((unsigned)time(NULL));
+	 //srand((unsigned)time(NULL));
 	 IplImage *pSrcImage = cvCreateImage(cvGetSize(srcc), srcc->depth, srcc->nChannels);
 	 Mat psrc=pSrcImage;
 	 Mat new_image = Mat::zeros( psrc.size(), psrc.type() );
@@ -1393,7 +1393,7 @@ void backgroundpicture(const char *save_file,IplImage *src,IplImage *dst1,int Th
 		  if(cvPointPolygonTest( pcvSeq, Point2f(i,j), 0 )>=0)
 		  {
 
-			   CvScalar s1=cvGet2D(dstImg,j,i);//背景图
+			   CvScalar s1=cvGet2D(dstImg1,j+diy,i+dix);//背景图
 			    CvScalar s3=s1;
 			   CvScalar s2=cvGet2D(srcc,j,i);//目标图
 			  // CvScalar color=cvGet2D(srcc,j,i);
